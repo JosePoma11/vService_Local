@@ -79,8 +79,9 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('server:onDeleteAccount', info);
   });
 
-  socket.on('client:change-info', (info) => {
-    io.emit('server:change-info', info);
+  socket.on('client:updateOrder', (info) => {
+    socket.broadcast.emit('server:orderUpdated', info);
+    socket.broadcast.emit('server:orderUpdated:child', info);
   });
 
   socket.on('client:cancel-delivery', (info) => {
@@ -95,8 +96,10 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('server:change-cod', info);
   });
 
-  socket.on('client:cCuadre', (info) => {
-    socket.broadcast.emit('server:cCuadre', info);
+  socket.on('client:changeCuadre', (info) => {
+    // socket.broadcast.emit('server:changeCuadre', info);
+    io.emit('server:changeCuadre', info);
+    socket.broadcast.emit('server:changeCuadre:child', info);
   });
 
   socket.on('client:cPricePrendas', (info) => {

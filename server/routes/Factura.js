@@ -45,8 +45,14 @@ router.post('/add-factura', openingHours, async (req, res) => {
     // Crear el nuevo índice incrementando el último índice en 1
     const nuevoIndice = ultimoIndice + 1;
 
+    const dateCreation = {
+      fecha: moment().format('YYYY-MM-DD'),
+      hora: moment().format('HH:mm'),
+    };
+
     // Crear el nuevo registro con el índice asignado
     const nuevoDato = new Factura({
+      dateCreation,
       codRecibo,
       dateRecepcion,
       Modalidad,
@@ -60,7 +66,7 @@ router.post('/add-factura', openingHours, async (req, res) => {
       descuento,
       estadoPrenda,
       estado,
-      index: nuevoIndice,
+      index: nuevoIndice, // Asignar el nuevo índice al registro
       dni,
       subTotal,
       totalNeto,
@@ -88,6 +94,22 @@ router.get('/get-factura', (req, res) => {
   Factura.find()
     .then((facturas) => {
       res.json(facturas);
+    })
+    .catch((error) => {
+      console.error('Error al obtener los datos:', error);
+      res.status(500).json({ mensaje: 'Error al obtener los datos' });
+    });
+});
+
+router.get('/get-factura/:id', (req, res) => {
+  const { id } = req.params; // Obteniendo el id desde los parámetros de la URL
+  Factura.findById(id)
+    .then((factura) => {
+      if (factura) {
+        res.json(factura);
+      } else {
+        res.status(404).json({ mensaje: 'Factura no encontrada' });
+      }
     })
     .catch((error) => {
       console.error('Error al obtener los datos:', error);
@@ -205,9 +227,10 @@ router.put('/update-factura/:id', openingHours, (req, res) => {
     });
 });
 
-router.post('/cancel-entrega/:id', async (req, res) => {
+router.post('/cancel-entrega/:idFactura', async (req, res) => {
   try {
-    const facturaId = req.params.id;
+    const { modalidad } = req.body;
+    const facturaId = req.params.idFactura;
 
     // Obtener factura por ID
     const factura = await Factura.findById(facturaId);
@@ -219,15 +242,10 @@ router.post('/cancel-entrega/:id', async (req, res) => {
 
     let idDeliveryDeleted;
     if (factura.estadoPrenda === 'entregado' && factura.dateEntrega.fecha === fechaActual) {
-      if (factura.Modalidad === 'Delivery') {
-        // Buscar deliveries relacionados y eliminar los de devolución
-        const deliveries = await Delivery.find({ idCliente: factura._id });
-        for (const delivery of deliveries) {
-          if (delivery.descripcion.includes('Devolucion') && delivery.fecha === factura.dateEntrega.fecha) {
-            idDeliveryDeleted = delivery._id;
-            await Delivery.findByIdAndDelete(delivery._id);
-          }
-        }
+      if (modalidad === 'Delivery') {
+        const { IdDelivery } = req.body;
+        idDeliveryDeleted = IdDelivery;
+        await Delivery.findByIdAndDelete(IdDelivery, { session: session });
       }
 
       // Actualizar cliente si tiene DNI

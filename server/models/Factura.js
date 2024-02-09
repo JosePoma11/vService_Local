@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
 
 const facturaSchema = new mongoose.Schema({
+  dateCreation: {
+    fecha: String,
+    hora: String,
+  },
   codRecibo: String,
   dateRecepcion: {},
   Modalidad: String,
@@ -16,6 +20,8 @@ const facturaSchema = new mongoose.Schema({
       },
       metodoPago: String,
       total: Number,
+      idUser: String,
+      idCuadre: String,
     },
   ],
   datePrevista: {},

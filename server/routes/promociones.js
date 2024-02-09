@@ -67,7 +67,7 @@ async function generarCodigoPromocionUnico() {
 }
 
 router.get('/get-promociones', (req, res) => {
-  Promociones.find({ state: true }) // Agrega la condición para obtener solo promociones con state:true
+  Promociones.find({ state: { $ne: false } }) // $ne selecciona los documentos donde 'state' no es igual a 'false'
     .then((promos) => {
       res.json(promos);
     })

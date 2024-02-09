@@ -475,4 +475,20 @@ router.delete('/delete-user/:id', async (req, res) => {
   }
 });
 
+router.get('/get-user/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await Usuario.findById(userId);
+
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(404).json({ mensaje: 'Usuario no encontrado' });
+    }
+  } catch (error) {
+    console.error('Error al obtener la información del usuario:', error);
+    res.status(500).json({ mensaje: 'Error al obtener la información del usuario' });
+  }
+});
+
 export default router;
